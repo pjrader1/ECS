@@ -1108,6 +1108,7 @@ namespace ECS
 
 			auto handle = ComponentHandle<T>(&container->data);
 			world->emit<Events::OnComponentAssigned<T>>({ this, handle });
+			world->emit<Events::OnAnyComponentAssigned>({ this, std::type_index(typeid(T)) });
 			return handle;
 		}
 	}
