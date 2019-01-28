@@ -28,6 +28,7 @@ SOFTWARE.
 #include <algorithm>
 #include <stdint.h>
 #include <type_traits>
+#include <typeindex>
 
 //////////////////////////////////////////////////////////////////////////
 // SETTINGS //
@@ -374,6 +375,22 @@ namespace ECS
 
 			Entity* entity;
 			ComponentHandle<T> component;
+		};
+		
+		// Called when any component is assigned
+		struct OnAnyComponentAssigned
+		{
+			ECS_DECLARE_TYPE;
+			
+			Entity* entity;
+			std::type_index type;
+		};
+		struct OnAnyComponentRemoved
+		{
+			ECS_DECLARE_TYPE;
+			
+			Entity* entity;
+			std::type_index type;
 		};
 
 #ifdef ECS_NO_RTTI
@@ -934,6 +951,7 @@ namespace ECS
 			{
 				auto handle = ComponentHandle<T>(&data);
 				ent->getWorld()->emit<Events::OnComponentRemoved<T>>({ ent, handle });
+				ent->getWorld()->emit<Events::OnAnyComponentRemoved>({ ent, std::type_index(typeid(T)) });
 			}
 		};
 	}
@@ -1076,6 +1094,7 @@ namespace ECS
 
 			auto handle = ComponentHandle<T>(&container->data);
 			world->emit<Events::OnComponentAssigned<T>>({ this, handle });
+			world->emit<Events::OnAnyComponentAssigned>({ this, std::type_index(typeid(T)) });
 			return handle;
 		}
 		else
